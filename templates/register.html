@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
 
 {% block tabheading %}Registration{% endblock %}
 
@@ -6,20 +8,13 @@
 
 {% block content %}
 
-<form action="" >
+<form action="/register" method="POST" >
      <div class="container">
-         <label for="uname"><b>Username</b></label><br>
-         <input type="text" placeholder="Enter Username" name="uname" required><br>
-
-         <label for="email"><b>Email</b></label><br>
-         <input type="text" placeholder="Enter email id" name="email" required><br>
-
-         <label for="psw"><b>Password</b></label><br>
-         <input type="password" placeholder="Enter a password" name="psw" required><br>
-
-         <label>
-             <input type="checkbox" checked="checked" name="remember">Remember me
-         </label><br>
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.username) }}
+        {{ wtf.form_field(form.email) }}
+        {{ wtf.form_field(form.password) }}
+        
 
          <button type="submit">Register</button><br>
         

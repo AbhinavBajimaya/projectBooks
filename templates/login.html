@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
 
 
 {% block tabheading %}Login Page{% endblock %}
@@ -7,19 +9,16 @@
 
 {% block content %}
 
-<form action="" method="POST">
+<form action="/login" method="POST">
     <div class="container">
-        <label for="uname"><b>Username</b></label><br>
-        <input type="text" placeholder="Enter Username" name="uname" required><br>
-
-        <label for="psw"><b>Password</b></label><br>
-        <input type="password" placeholder="Enter Password" name="psw" required><br>
+       {{ form.hidden_tag() }}
+       {{ wtf.form_field(form.username) }}
+       {{ wtf.form_field(form.password) }}
+       {{ wtf.form_field(form.remember) }}
+        
 
         <button type="submit">Login</button><br>
-        <label>
-            <input type="checkbox" checked="checked" name="remember">
-            Remember me
-        </label><br>
+        
     </div>
 
 
