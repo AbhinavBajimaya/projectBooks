@@ -8,6 +8,11 @@
     </title>
 </head>
 <body>
+    <div class="navbar">
+        <a class="active" href="#" >Home</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+    </div>
     
     {% block pageheading %}
     {% endblock %}
