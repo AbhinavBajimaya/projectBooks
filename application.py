@@ -1,6 +1,6 @@
 #do the imports here
 import os
-from flask import Flask, session,render_template,request,flash
+from flask import Flask, session,render_template,request,flash,redirect,url_for
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -9,6 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,BooleanField
 from wtforms.validators import InputRequired,email_validator,Length,Email
 import requests
+#from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user,current_user
 
 
 #setup
@@ -46,10 +47,14 @@ class RegisterForm(FlaskForm):
 #Routes
 @app.route("/")
 def index():
+    if "username" in session:
+        return redirect(url_for('dashboard'))
     return render_template("index.html")
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
+    if "username" in session:
+        return redirect(url_for('dashboard'))
     form=RegisterForm()
     if form.validate_on_submit():
         username=request.form.get("username")
@@ -58,7 +63,7 @@ def register():
         db.execute("INSERT INTO users (username,email,password) VALUES (:username,:email,:password)",
         {"username":username,"email":email,"password":password} )
         db.commit()
-        flash('Registered succesfully')   
+        #flash('Registered succesfully')   
        # return render_template("index.html",message="Registration Successful")
     
     return render_template("register.html", form=form)
@@ -66,11 +71,36 @@ def register():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+    if "username" in session:
+        return redirect(url_for('dashboard'))
     form=LoginForm()
     if form.validate_on_submit():
-        return('<h1>'+form.username.data+ '</h1>')
+        username=request.form.get("username")
+        user=db.execute("SELECT * FROM users WHERE username=:username", {"username":username}).fetchone()
+        if user:
+            password=request.form.get("password")
+            if(password==user.password):
+                session["username"] = user.username
+                session["id"] = user.id
+                session["email"]=user.email
+                return redirect(url_for('dashboard'))
+            else:
+                return('<h1>Invalidsername/Password</h1>')
+        else:
+             return('<h1>InvalidUsername/Password</h1>')
+                 
+        #return('<h1>'+form.username.data+ '</h1>')
 
     return render_template("login.html", form=form)
+
+@app.route("/dashboard",methods=['GET','POST'])
+def dashboard():
+    if "username" in session:
+        username=session["username"]
+        return render_template("dashboard.html",username=username)
+    else:
+        return redirect(url_for('login'))
+    
 
 
 
