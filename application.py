@@ -18,6 +18,7 @@ Bootstrap(app)
 app.config['SECRET_KEY']="abhinav"
 
 # Check for environment variable
+DATABASE_URL="postgres://ghavkjvddfqrlb:44d807999d59280b8ab0440d66946f69b2c6601b94d1879574f7ace5e4104899@ec2-18-235-97-230.compute-1.amazonaws.com:5432/d9jrtqc0v005hs"
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
@@ -27,6 +28,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Set up database
+
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
@@ -48,13 +50,13 @@ class RegisterForm(FlaskForm):
 @app.route("/")
 def index():
     if "username" in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('search'))
     return render_template("index.html")
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if "username" in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('search'))
     form=RegisterForm()
     if form.validate_on_submit():
         username=request.form.get("username")
@@ -72,7 +74,7 @@ def register():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if "username" in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('search'))
     form=LoginForm()
     if form.validate_on_submit():
         username=request.form.get("username")
@@ -83,7 +85,7 @@ def login():
                 session["username"] = user.username
                 session["id"] = user.id
                 session["email"]=user.email
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('search'))
             else:
                 return('<h1>Invalidsername/Password</h1>')
         else:
@@ -93,14 +95,22 @@ def login():
 
     return render_template("login.html", form=form)
 
-@app.route("/dashboard",methods=['GET','POST'])
-def dashboard():
+@app.route("/search",methods=['GET','POST'])
+def search():
     if "username" in session:
         username=session["username"]
-        return render_template("dashboard.html",username=username)
+        thisbook=db.execute("SELECT author FROM books WHERE year=1991").fetchone()
+        return render_template("search.html",username=username,thisbook=thisbook)
     else:
         return redirect(url_for('login'))
-    
+
+@app.route("/logout")
+def logout():
+    session.pop("username")
+    session.pop("id")
+    session.pop("email")
+    return redirect(url_for('index'))
+
 
 
 

@@ -5,3 +5,11 @@ CREATE TABLE users(
     password VARCHAR NOT NULL
 
 );
+
+CREATE TABLE books(
+    id SERIAL PRIMARY KEY,
+    isbn VARCHAR UNIQUE NOT NULL,
+    title VARCHAR NOT NULL,
+    author VARCHAR NOT NULL,
+    year SMALLINT NOT NULL
+);
