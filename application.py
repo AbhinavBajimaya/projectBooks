@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,BooleanField
 from wtforms.validators import InputRequired,email_validator,Length,Email
 import requests
-#from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user,current_user
+
 
 
 #setup
@@ -18,9 +18,7 @@ Bootstrap(app)
 app.config['SECRET_KEY']="abhinav"
 
 # Check for environment variable
-DATABASE_URL="postgres://ghavkjvddfqrlb:44d807999d59280b8ab0440d66946f69b2c6601b94d1879574f7ace5e4104899@ec2-18-235-97-230.compute-1.amazonaws.com:5432/d9jrtqc0v005hs"
-if not os.getenv("DATABASE_URL"):
-    raise RuntimeError("DATABASE_URL is not set")
+
 
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
@@ -29,7 +27,8 @@ Session(app)
 
 # Set up database
 
-engine = create_engine(os.getenv("DATABASE_URL"))
+engine = create_engine('postgres://ghavkjvddfqrlb:44d807999d59280b8ab0440d66946f69b2c6601b94d1879574f7ace5e4104899@'
+                        'ec2-18-235-97-230.compute-1.amazonaws.com:5432/d9jrtqc0v005hs')
 db = scoped_session(sessionmaker(bind=engine))
 
 
@@ -99,8 +98,8 @@ def login():
 def search():
     if "username" in session:
         username=session["username"]
-        thisbook=db.execute("SELECT author FROM books WHERE year=1991").fetchone()
-        return render_template("search.html",username=username,thisbook=thisbook)
+        #thisbook=db.execute("SELECT author FROM books WHERE year=1991").fetchone()
+        return render_template("search.html",username=username)
     else:
         return redirect(url_for('login'))
 
@@ -110,6 +109,19 @@ def logout():
     session.pop("id")
     session.pop("email")
     return redirect(url_for('index'))
+
+@app.route("/booklist",methods=['GET','POST'])
+def booklist():
+    searchtype=request.form.get("searchtype")
+    searchinput=request.form.get("searchinput")
+    if searchtype=="year":
+        books=db.execute("SELECT * FROM books WHERE year = :searchinput",{"searchinput":searchinput}).fetchall()
+    else:    
+        books=db.execute("SELECT * FROM books WHERE UPPER(" + searchtype + ") LIKE :searchinput ORDER BY title",{"searchinput":"%" +searchinput.upper() +"%"}).fetchall()
+    if books:
+        return render_template("booklist.html",books=books)
+    return('<h1>Sorry! No matches found</h1>')
+    
 
 
 

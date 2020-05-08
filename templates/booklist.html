@@ -1,0 +1,16 @@
+{% extends "base1.html" %}
+
+{% block tabheading %}Booklist{% endblock %}
+
+{% block pageheading %}Returned Booklist{% endblock %}
+
+{% block content %}
+
+{% for book in books %}
+   <ul>
+       <li>{{book.title}} by {{book.author}} :{{book.year}}</li>
+   </ul>
+{% endfor %}
+
+
+{% endblock %}
