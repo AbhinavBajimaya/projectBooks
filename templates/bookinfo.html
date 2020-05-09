@@ -1,0 +1,17 @@
+{% extends "base1.html" %}
+
+{% block tabheading %}{{book.title}}{% endblock %}
+
+{% block pageheading %}{% endblock %}
+
+{% block content %}
+
+<p> 
+    TITLE  : {{book.title}}<br>
+    AUTHOR : {{book.author}}<br>
+    YEAR   : {{book.year}}<br>
+    ISBN   : {{book.isbn}}<br>
+</p>
+
+
+{% endblock %}

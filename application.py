@@ -105,24 +105,36 @@ def search():
 
 @app.route("/logout")
 def logout():
-    session.pop("username")
-    session.pop("id")
-    session.pop("email")
-    return redirect(url_for('index'))
+    if "username" in session:
+        session.pop("username")
+        session.pop("id")
+        session.pop("email")
+        return redirect(url_for('index'))
+    else:
+        return redirect(url_for('login'))
 
 @app.route("/booklist",methods=['GET','POST'])
 def booklist():
-    searchtype=request.form.get("searchtype")
-    searchinput=request.form.get("searchinput")
-    if searchtype=="year":
-        books=db.execute("SELECT * FROM books WHERE year = :searchinput",{"searchinput":searchinput}).fetchall()
-    else:    
-        books=db.execute("SELECT * FROM books WHERE UPPER(" + searchtype + ") LIKE :searchinput ORDER BY title",{"searchinput":"%" +searchinput.upper() +"%"}).fetchall()
-    if books:
-        return render_template("booklist.html",books=books)
-    return('<h1>Sorry! No matches found</h1>')
-    
+    if "username" in session:
+        searchtype=request.form.get("searchtype")
+        searchinput=request.form.get("searchinput")
+        if searchtype=="year":
+            books=db.execute("SELECT * FROM books WHERE year = :searchinput",{"searchinput":searchinput}).fetchall()
+        else:    
+            books=db.execute("SELECT * FROM books WHERE UPPER(" + searchtype + ") LIKE :searchinput ORDER BY title",{"searchinput":"%" +searchinput.upper() +"%"}).fetchall()
+        if books:
+            return render_template("booklist.html",books=books)
+        return('<h1>Sorry! No matches found</h1>')
+    else:
+        return redirect(url_for('login'))
 
+@app.route("/bookinfo/<int:book_id>",methods=['POST','GET'])
+def bookinfo(book_id):
+    if "username" in session:
+        book=db.execute("SELECT * FROM books WHERE id=:book_id",{"book_id":book_id}).fetchone()
+        return render_template("bookinfo.html",book=book)
+    else:
+        return redirect(url_for('login'))
 
 
 
