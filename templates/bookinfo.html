@@ -5,13 +5,44 @@
 {% block pageheading %}{% endblock %}
 
 {% block content %}
-
+<!--display book info-->
 <p> 
-    TITLE  : {{book.title}}<br>
+    <div>
+        TITLE  : {{book.title}}<br>
     AUTHOR : {{book.author}}<br>
     YEAR   : {{book.year}}<br>
     ISBN   : {{book.isbn}}<br>
+    </div>
+    
+    <h3>Reviews</h3>
+    <div>
+        {% for review in reviews %}
+       {{review.rating }} {{review.review}} {{review.username}}  {{review.book_id}} {{review.user_id}} {{review.id}}<br>
+        {% endfor %}
+        
+           
+    </div>
 </p>
+<!--for rating submission-->
+    <form action="{{ url_for('bookinfo', book_id=book.id) }}" method="POST">
+        <div>
+            <label for="rating">Rating</label>
+            <select name="rating">
+                {% for limit in range(5) %}
+                    <option value="{{limit+1}}">{{limit+1}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="review">Your Review</label>
+            <textarea rows="10" name="review"></textarea>
+        </div>
+        <div>
+            <button type="submit">Submit</button>
+        </div>
+        
+
+    </form>
 
 
 {% endblock %}

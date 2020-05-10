@@ -13,3 +13,11 @@ CREATE TABLE books(
     author VARCHAR NOT NULL,
     year SMALLINT NOT NULL
 );
+
+CREATE TABLE reviews(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users,
+    book_id INTEGER REFERENCES books,
+    rating SMALLINT NOT NULL CONSTRAINT invalid_rating CHECK (rating <=5 AND rating >=1),
+    review VARCHAR 
+);

@@ -82,7 +82,7 @@ def login():
             password=request.form.get("password")
             if(password==user.password):
                 session["username"] = user.username
-                session["id"] = user.id
+                session["user_id"] = user.id
                 session["email"]=user.email
                 return redirect(url_for('search'))
             else:
@@ -107,7 +107,7 @@ def search():
 def logout():
     if "username" in session:
         session.pop("username")
-        session.pop("id")
+        session.pop("user_id")
         session.pop("email")
         return redirect(url_for('index'))
     else:
@@ -130,9 +130,29 @@ def booklist():
 
 @app.route("/bookinfo/<int:book_id>",methods=['POST','GET'])
 def bookinfo(book_id):
-    if "username" in session:
+    if "username" in session and request.method=="GET":
         book=db.execute("SELECT * FROM books WHERE id=:book_id",{"book_id":book_id}).fetchone()
-        return render_template("bookinfo.html",book=book)
+        reviews=db.execute("SELECT * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id", {"book_id":book_id}).fetchall()
+        return render_template("bookinfo.html",book=book,reviews=reviews)
+    if request.method=="POST":
+        user_id=session["user_id"]
+        user_review=request.form.get("review")
+        user_rating=request.form.get("rating")
+        review=db.execute("SELECT * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id AND user_id=:user_id",{"book_id":book_id,"user_id":user_id}).fetchone()
+        if review:
+            db.execute("UPDATE reviews SET review=:user_review , rating=:user_rating WHERE book_id=:book_id AND user_id=:user_id",
+            {"user_review":user_review,"user_rating":user_rating,"user_id":user_id,"book_id":book_id})
+            
+        else:
+            db.execute("INSERT INTO reviews (user_id,book_id,rating,review) VALUES (:user_id,:book_id,:rating,:review)",
+            {"user_id":user_id,"book_id":book_id,"rating":user_rating,"review":user_review})
+        db.commit()   
+        book=db.execute("SELECT * FROM books WHERE id=:book_id",{"book_id":book_id}).fetchone()
+        reviews=db.execute("SELECT * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id",{"book_id":book_id}).fetchall()
+        
+        return render_template("bookinfo.html",book=book,reviews=reviews)
+        
+    
     else:
         return redirect(url_for('login'))
 
