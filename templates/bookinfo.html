@@ -15,12 +15,23 @@
     </div>
     
     <h3>Reviews</h3>
+    <p>from Goodreads website : average rating : {{avgrat}}</p>
     <div>
-        {% for review in reviews %}
-       {{review.rating }} {{review.review}} {{review.username}}  {{review.book_id}} {{review.user_id}} {{review.id}}<br>
-        {% endfor %}
         
-           
+        <ul>
+            {% for review in reviews %}
+            <li>
+                <div>
+                    <p>username: {{review.username}} </p>
+                    <p>{{review.rating }}out of 5 on bookid:{{review.book_id}}</p>
+                    <p>{{review.review}}</p>
+                   
+                </div>
+                
+            </li>
+            {% endfor %}
+        </ul>
+          
     </div>
 </p>
 <!--for rating submission-->

@@ -130,10 +130,15 @@ def booklist():
 
 @app.route("/bookinfo/<int:book_id>",methods=['POST','GET'])
 def bookinfo(book_id):
+    isbn=db.execute("SELECT isbn FROM books WHERE id=:book_id",{"book_id":book_id})
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "Ul9yBdLyfBifGakeK7p1Ug", "isbns": isbn}).json()   
+    avgrat=res["books"][0]["average_rating"]
+    
+    
     if "username" in session and request.method=="GET":
         book=db.execute("SELECT * FROM books WHERE id=:book_id",{"book_id":book_id}).fetchone()
-        reviews=db.execute("SELECT * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id", {"book_id":book_id}).fetchall()
-        return render_template("bookinfo.html",book=book,reviews=reviews)
+        reviews=db.execute("SELECT reviews.id AS ida, * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id", {"book_id":book_id}).fetchall()
+        return render_template("bookinfo.html",book=book,reviews=reviews,avgrat=avgrat)
     if request.method=="POST":
         user_id=session["user_id"]
         user_review=request.form.get("review")
@@ -148,11 +153,10 @@ def bookinfo(book_id):
             {"user_id":user_id,"book_id":book_id,"rating":user_rating,"review":user_review})
         db.commit()   
         book=db.execute("SELECT * FROM books WHERE id=:book_id",{"book_id":book_id}).fetchone()
-        reviews=db.execute("SELECT * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id",{"book_id":book_id}).fetchall()
+        reviews=db.execute("SELECT reviews.id AS ida, * FROM reviews JOIN users ON reviews.user_id=users.id JOIN books ON reviews.book_id=books.id WHERE book_id=:book_id",{"book_id":book_id}).fetchall()
         
-        return render_template("bookinfo.html",book=book,reviews=reviews)
-        
-    
+        return render_template("bookinfo.html",book=book,reviews=reviews,avgrat=avgrat)
+      
     else:
         return redirect(url_for('login'))
 
